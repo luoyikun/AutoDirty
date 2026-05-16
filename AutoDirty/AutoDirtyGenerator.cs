@@ -235,6 +235,7 @@ namespace AutoDirty
 
             var indent = GetIndent(classSymbol) + "    ";
             builder.Append(indent).AppendLine("private global::System.Action __autoDirtyParentDirty;");
+            builder.Append(indent).AppendLine("private global::System.Action __autoDirtySelfDirty;");
             builder.AppendLine();
 
             foreach (var property in properties)
@@ -291,7 +292,14 @@ namespace AutoDirty
 
             builder.Append(indent).AppendLine("void global::Amanda.IAutoDirtyNode.SetDirtyCallback(global::System.Action markDirty)");
             builder.Append(indent).AppendLine("{");
+            builder.Append(indent).AppendLine("    if (global::System.Object.ReferenceEquals(__autoDirtyParentDirty, markDirty))");
+            builder.Append(indent).AppendLine("        return;");
             builder.Append(indent).AppendLine("    __autoDirtyParentDirty = markDirty;");
+            builder.Append(indent).AppendLine("}");
+            builder.AppendLine();
+            builder.Append(indent).AppendLine("private global::System.Action __AutoDirtyGetSelfDirtyCallback()");
+            builder.Append(indent).AppendLine("{");
+            builder.Append(indent).AppendLine("    return __autoDirtySelfDirty ?? (__autoDirtySelfDirty = __AutoDirtyMarkDirty);");
             builder.Append(indent).AppendLine("}");
             builder.AppendLine();
             builder.Append(indent).AppendLine("private void __AutoDirtyMarkDirty()");
@@ -319,7 +327,7 @@ namespace AutoDirty
                 if (property.CanContainDirtyNode)
                 {
                     builder.Append(indent).Append("        if (").Append(fieldName).AppendLine(" is global::Amanda.IAutoDirtyNode __autoDirtyChild)");
-                    builder.Append(indent).AppendLine("            __autoDirtyChild.SetDirtyCallback(__AutoDirtyMarkDirty);");
+                    builder.Append(indent).AppendLine("            __autoDirtyChild.SetDirtyCallback(__AutoDirtyGetSelfDirtyCallback());");
                 }
 
                 builder.Append(indent).Append("        return ").Append(fieldName).AppendLine(";");
@@ -376,7 +384,7 @@ namespace AutoDirty
                     .Append(">(");
             }
 
-            builder.Append(fieldName).AppendLine(", __AutoDirtyMarkDirty);");
+            builder.Append(fieldName).AppendLine(", __AutoDirtyGetSelfDirtyCallback());");
             builder.Append(indent).AppendLine("        }");
             builder.AppendLine();
             builder.Append(indent).Append("        return ").Append(wrapperName).AppendLine(";");
@@ -432,7 +440,7 @@ namespace AutoDirty
             if (property.CanContainDirtyNode)
             {
                 builder.Append(indent).AppendLine("        if (value is global::Amanda.IAutoDirtyNode __autoDirtyChild)");
-                builder.Append(indent).AppendLine("            __autoDirtyChild.SetDirtyCallback(__AutoDirtyMarkDirty);");
+                builder.Append(indent).AppendLine("            __autoDirtyChild.SetDirtyCallback(__AutoDirtyGetSelfDirtyCallback());");
             }
 
             builder.Append(indent).AppendLine("        __AutoDirtyMarkDirty();");

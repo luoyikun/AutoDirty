@@ -8,3 +8,4 @@ E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.As
 E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.csproj.CoreCompileInputs.cache
 E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.dll
 E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.pdb
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.sourcelink.json

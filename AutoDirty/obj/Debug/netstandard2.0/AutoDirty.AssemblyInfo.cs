@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Unity-compatible Roslyn source generator that creates dirty-marking properties.")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f4ea1a94cee059fa1f51c2b82aa5eaaa36956638")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutoDirty")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutoDirty")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

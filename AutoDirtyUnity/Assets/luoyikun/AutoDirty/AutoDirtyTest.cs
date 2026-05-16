@@ -1,13 +1,14 @@
 ﻿using Amanda;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
-namespace MudGame
+namespace Amanda
 {
     public class AutoDirtyTest : MonoBehaviour
     {
         PlayerData m_playerData = new PlayerData();
-
+        public const bool m_isLog = false;
 
         private void Start()
         {
@@ -48,7 +49,14 @@ namespace MudGame
             {
                 m_playerData.CharData.ListClassC[0].HashTest.Add(2);
             }
+
+            Profiler.BeginSample("TestAutoDirty");
+            m_playerData.CharData.ClassC.Dic[1] = 2;
+
+            Profiler.EndSample();
         }
+
+
     }
 
     [AutoDirty]
@@ -62,7 +70,10 @@ namespace MudGame
         void MarkDirty()
         {
             //SaveManager.Instance.MarkDirty(this);
-            Debug.Log("PlayerData has been marked dirty.");
+            if (AutoDirtyTest.m_isLog)
+            {
+                Debug.Log("PlayerData has been marked dirty.");
+            }
         }
     }
 
@@ -76,7 +87,10 @@ namespace MudGame
         ClassC m_classC = new();
         void MarkDirty()
         {
-            Debug.Log("ChatData has been marked dirty.");
+            if (AutoDirtyTest.m_isLog)
+            {
+                Debug.Log("ChatData has been marked dirty.");
+            }
         }
     }
 
@@ -84,15 +98,14 @@ namespace MudGame
     public partial class ClassC
     {
         Dictionary<int, int> m_dic  = new();
-        HashSet<int> m_hashTest  = new();
+        HashSet<int> m_hashTest = new();
         void MarkDirty()
         {
-            Debug.Log("ClassC has been marked dirty.");
+            if (AutoDirtyTest.m_isLog)
+            {
+                Debug.Log("ClassC has been marked dirty.");
+            }
         }
     }
 
-    public interface IAutoDirtyNode
-    {
-        void MarkDirty();
-    }
 }

@@ -26,7 +26,7 @@ In Unity, make sure the DLL has the `RoslynAnalyzer` label.
 using Amanda;
 using UnityEngine;
 
-namespace MudGame
+namespace Amanda
 {
     [AutoDirty]
     public partial class PlayerData
@@ -46,7 +46,7 @@ namespace MudGame
 Generated shape:
 
 ```csharp
-namespace MudGame
+namespace Amanda
 {
     public partial class PlayerData
     {
@@ -74,6 +74,7 @@ Rules:
 - `Dictionary<TKey, TValue>` fields generate `IDictionary<TKey, TValue>` properties backed by a dirty-aware wrapper, so `Dic[key] = value`, `Add`, `Remove`, and `Clear` call `MarkDirty()`.
 - `HashSet<T>` fields generate `AutoDirtySet<T>` properties backed by a dirty-aware wrapper, so `Add`, `Remove`, `Clear`, set operations, and the helper indexer call `MarkDirty()`.
 - Nested `[AutoDirty]` objects notify their parent when they are reached through the generated property, for example `data.Child.Name = "x"`.
+- Generated nested dirty callbacks are cached per object, so repeated `SetDirtyCallback` calls do not allocate a new delegate each time.
 - Add `[AutoDirtyIgnore]` to a field to skip it.
 - Do not also handwrite `PlayerName` in the source class. A source generator can add source files, but it cannot remove or rewrite an existing auto-property.
 - `[AutoDirtyProperty("Name", typeof(Type))]` is still supported for cases where you do not want to declare a backing field.
