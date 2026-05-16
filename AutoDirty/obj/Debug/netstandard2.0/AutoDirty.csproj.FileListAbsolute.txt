@@ -1,0 +1,10 @@
+E:\GithubProjects\Data\AutoDirty\AutoDirty\bin\Debug\netstandard2.0\AutoDirty.deps.json
+E:\GithubProjects\Data\AutoDirty\AutoDirty\bin\Debug\netstandard2.0\AutoDirty.dll
+E:\GithubProjects\Data\AutoDirty\AutoDirty\bin\Debug\netstandard2.0\AutoDirty.pdb
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.csproj.AssemblyReference.cache
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.GeneratedMSBuildEditorConfig.editorconfig
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.AssemblyInfoInputs.cache
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.AssemblyInfo.cs
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.csproj.CoreCompileInputs.cache
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.dll
+E:\GithubProjects\Data\AutoDirty\AutoDirty\obj\Debug\netstandard2.0\AutoDirty.pdb
