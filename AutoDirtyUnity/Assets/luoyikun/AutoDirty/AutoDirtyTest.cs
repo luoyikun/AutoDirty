@@ -1,4 +1,5 @@
 ﻿using Amanda;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -8,7 +9,7 @@ namespace Amanda
     public class AutoDirtyTest : MonoBehaviour
     {
         PlayerData m_playerData = new PlayerData();
-        public const bool m_isLog = false;
+        public const bool m_isLog = true;
 
         private void Start()
         {
@@ -49,6 +50,14 @@ namespace Amanda
             {
                 m_playerData.CharData.ListClassC[0].HashTest.Add(2);
             }
+            else if (Input.GetKeyDown(KeyCode.Alpha8))
+            {
+                string content = JsonConvert.SerializeObject(m_playerData);
+                PlayerData newPlayerData = JsonConvert.DeserializeObject<PlayerData>(content);
+                string newContent = JsonConvert.SerializeObject(newPlayerData);
+                Debug.Log($"Original Content: {content}");
+                Debug.Log($"New Content: {newContent}");
+            }
 
             Profiler.BeginSample("TestAutoDirty");
             m_playerData.CharData.ClassC.Dic[1] = 2;
@@ -60,30 +69,40 @@ namespace Amanda
     }
 
     [AutoDirty]
+    [JsonObject(MemberSerialization.OptIn)]  // 类级别：opt-in 模式
     public partial class PlayerData 
     {
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         string m_PlayerName;
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         int m_Level;
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         List<int> m_ListInt = new();
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         bool m_bReta;
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         ChatData m_charData = new();
         void MarkDirty()
         {
             //SaveManager.Instance.MarkDirty(this);
             if (AutoDirtyTest.m_isLog)
             {
-                Debug.Log("PlayerData has been marked dirty.");
+                Debug.Log("PlayerData has been marked dirty.");  
             }
         }
     }
 
     [AutoDirty]
+    [JsonObject(MemberSerialization.OptIn)]  // 类级别：opt-in 模式
     public partial class ChatData 
     {
-        //[AutoDirtyPropertyName("data")]
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         int m_data;
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         List<int> m_ListB = new();
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         List<ClassC> m_listClassC = new();
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         ClassC m_classC = new();
         void MarkDirty()
         {
@@ -95,9 +114,12 @@ namespace Amanda
     }
 
     [AutoDirty]
+    [JsonObject(MemberSerialization.OptIn)]  // 类级别：opt-in 模式
     public partial class ClassC
     {
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         Dictionary<int, int> m_dic  = new();
+        [JsonProperty]          // 只有打上此标签的成员才会被序列化
         HashSet<int> m_hashTest = new();
         void MarkDirty()
         {
