@@ -4,6 +4,8 @@ Unity-compatible Roslyn source generator. It finds classes marked with `[AutoDir
 
 The generator targets `netstandard2.0` and references `Microsoft.CodeAnalysis.CSharp 3.8.0`, which matches Unity 2022's source generator requirements.
 
+Runtime helper types live in `AutoDirtyUnity/Assets/luoyikun/AutoDirty/AutoDirty.cs`. The generator only emits business partial classes and references the shared `Amanda` runtime types.
+
 ## Unity Usage
 
 Build the generator:
@@ -19,6 +21,8 @@ AutoDirtyUnity/Assets/Roslyn/AutoDirty.dll
 ```
 
 In Unity, make sure the DLL has the `RoslynAnalyzer` label.
+
+Also keep `AutoDirty.cs` in a runtime assembly that every generated data assembly can reference. It defines `[AutoDirty]`, `[AutoDirtyIgnore]`, `[AutoDirtyPropertyName]`, `IAutoDirtyNode`, and the dirty-aware collection wrappers.
 
 ## Example
 
