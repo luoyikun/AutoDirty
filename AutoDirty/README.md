@@ -79,6 +79,7 @@ Rules:
 - `HashSet<T>` fields generate `AutoDirtySet<T>` properties backed by a dirty-aware wrapper, so `Add`, `Remove`, `Clear`, set operations, and the helper indexer call `MarkDirty()`.
 - Nested `[AutoDirty]` objects notify their parent when they are reached through the generated property, for example `data.Child.Name = "x"`.
 - Generated nested dirty callbacks are cached per object, so repeated `SetDirtyCallback` calls do not allocate a new delegate each time.
+- Add `[AutoDirtyRawCollection]` to a collection field when the generated property must keep the original concrete type, such as `List<T>` instead of `IList<T>`. In this mode, assigning the whole property marks dirty, but collection mutations like `Add` cannot be intercepted.
 - Add `[AutoDirtyIgnore]` to a field to skip it.
 - Do not also handwrite `PlayerName` in the source class. A source generator can add source files, but it cannot remove or rewrite an existing auto-property.
 - `[AutoDirtyProperty("Name", typeof(Type))]` is still supported for cases where you do not want to declare a backing field.

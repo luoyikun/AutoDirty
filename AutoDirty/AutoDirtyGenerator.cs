@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿/*******************************************************************
+ * 功能：源码生成器：[AutoDirty]的类，类成员变化自动调用MarkDirty()，支持属性和集合类型，不支持嵌套容器
+ * 作者：罗翊坤
+ * 时间：2026.05.20
+*******************************************************************/
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -15,6 +20,7 @@ namespace AutoDirty
         private const string AutoDirtyPropertyAttributeName = "AutoDirtyPropertyAttribute";
         private const string AutoDirtyIgnoreAttributeName = "AutoDirtyIgnoreAttribute";
         private const string AutoDirtyPropertyNameAttributeName = "AutoDirtyPropertyNameAttribute";
+        private const string AutoDirtyRawCollectionAttributeName = "AutoDirtyRawCollectionAttribute";
 
         private static readonly DiagnosticDescriptor ClassMustBePartial = new DiagnosticDescriptor(
             "AD0001",
@@ -37,7 +43,7 @@ namespace AutoDirty
             "AutoDirty class has no generated properties",
             "Class '{0}' has [AutoDirty] but no m_ fields or [AutoDirtyProperty(name, type)] attributes",
             "AutoDirty",
-            DiagnosticSeverity.Warning,
+            DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
         private static readonly DiagnosticDescriptor DuplicateProperty = new DiagnosticDescriptor(
@@ -162,7 +168,11 @@ namespace AutoDirty
                     continue;
                 }
 
-                yield return DirtyProperty.FromField(propertyName, field.Type, field.Name);
+                yield return DirtyProperty.FromField(
+                    propertyName,
+                    field.Type,
+                    field.Name,
+                    HasFieldAttributeNamed(field, AutoDirtyRawCollectionAttributeName));
             }
         }
 
@@ -247,7 +257,7 @@ namespace AutoDirty
                     builder.Append(indent).Append("private ").Append(typeName).Append(' ').Append(fieldName).AppendLine(";");
                 }
 
-                if (property.IsList)
+                if (property.UseDirtyCollectionWrapper && property.IsList)
                 {
                     builder.Append(indent)
                         .Append("private global::Amanda.AutoDirtyList<")
@@ -256,7 +266,7 @@ namespace AutoDirty
                         .Append(ToCamelCase(property.Name))
                         .AppendLine(";");
                 }
-                else if (property.IsDictionary)
+                else if (property.UseDirtyCollectionWrapper && property.IsDictionary)
                 {
                     builder.Append(indent)
                         .Append("private global::Amanda.AutoDirtyDictionary<")
@@ -267,7 +277,7 @@ namespace AutoDirty
                         .Append(ToCamelCase(property.Name))
                         .AppendLine(";");
                 }
-                else if (property.IsHashSet)
+                else if (property.UseDirtyCollectionWrapper && property.IsHashSet)
                 {
                     builder.Append(indent)
                         .Append("private global::Amanda.AutoDirtySet<")
@@ -318,10 +328,16 @@ namespace AutoDirty
 
         private static void AppendGetter(StringBuilder builder, string indent, DirtyProperty property, string fieldName)
         {
-            if (!property.IsList && !property.IsDictionary && !property.IsHashSet)
+            if (!property.UseDirtyCollectionWrapper || (!property.IsList && !property.IsDictionary && !property.IsHashSet))
             {
                 builder.Append(indent).AppendLine("    get");
                 builder.Append(indent).AppendLine("    {");
+                if (property.IsReferenceType)
+                {
+                    builder.Append(indent).Append("        if (").Append(fieldName).AppendLine(" == null)");
+                    builder.Append(indent).AppendLine("            return default;");
+                }
+
                 if (property.CanContainDirtyNode)
                 {
                     builder.Append(indent).Append("        if (").Append(fieldName).AppendLine(" is global::Amanda.IAutoDirtyNode __autoDirtyChild)");
@@ -337,7 +353,7 @@ namespace AutoDirty
             builder.Append(indent).AppendLine("    get");
             builder.Append(indent).AppendLine("    {");
             builder.Append(indent).Append("        if (").Append(fieldName).AppendLine(" == null)");
-            if (property.IsList)
+            if (property.UseDirtyCollectionWrapper && property.IsList)
             {
                 builder.Append(indent).Append("            ").Append(fieldName).Append(" = new global::System.Collections.Generic.List<")
                     .Append(property.ListElementTypeName)
@@ -361,7 +377,7 @@ namespace AutoDirty
             builder.Append(indent).Append("        if (").Append(wrapperName).AppendLine(" == null)");
             builder.Append(indent).AppendLine("        {");
             builder.Append(indent).Append("            ").Append(wrapperName);
-            if (property.IsList)
+            if (property.UseDirtyCollectionWrapper && property.IsList)
             {
                 builder.Append(" = new global::Amanda.AutoDirtyList<")
                     .Append(property.ListElementTypeName)
@@ -391,7 +407,7 @@ namespace AutoDirty
 
         private static void AppendSetter(StringBuilder builder, string indent, DirtyProperty property, string fieldName, string typeName)
         {
-            if (property.IsList)
+            if (property.UseDirtyCollectionWrapper && property.IsList)
             {
                 var wrapperName = "__autoDirty_" + ToCamelCase(property.Name);
                 builder.Append(indent).Append("        if (global::System.Object.ReferenceEquals(").Append(fieldName).AppendLine(", value))");
@@ -404,7 +420,7 @@ namespace AutoDirty
                 return;
             }
 
-            if (property.IsDictionary)
+            if (property.UseDirtyCollectionWrapper && property.IsDictionary)
             {
                 var wrapperName = "__autoDirty_" + ToCamelCase(property.Name);
                 builder.Append(indent).Append("        if (global::System.Object.ReferenceEquals(").Append(fieldName).AppendLine(", value))");
@@ -419,7 +435,7 @@ namespace AutoDirty
                 return;
             }
 
-            if (property.IsHashSet)
+            if (property.UseDirtyCollectionWrapper && property.IsHashSet)
             {
                 var wrapperName = "__autoDirty_" + ToCamelCase(property.Name);
                 builder.Append(indent).Append("        if (global::System.Object.ReferenceEquals(").Append(fieldName).AppendLine(", value))");
@@ -639,22 +655,23 @@ namespace AutoDirty
 
         private sealed class DirtyProperty
         {
-            private DirtyProperty(string name, ITypeSymbol type, string backingFieldName, bool generateBackingField)
+            private DirtyProperty(string name, ITypeSymbol type, string backingFieldName, bool generateBackingField, bool preserveCollectionType)
             {
                 Name = name;
                 Type = type;
                 BackingFieldName = backingFieldName;
                 GenerateBackingField = generateBackingField;
+                PreserveCollectionType = preserveCollectionType;
             }
 
             public static DirtyProperty FromAttribute(string name, ITypeSymbol type)
             {
-                return new DirtyProperty(name, type, "_" + ToCamelCase(name), true);
+                return new DirtyProperty(name, type, "_" + ToCamelCase(name), true, false);
             }
 
-            public static DirtyProperty FromField(string name, ITypeSymbol type, string backingFieldName)
+            public static DirtyProperty FromField(string name, ITypeSymbol type, string backingFieldName, bool preserveCollectionType)
             {
-                return new DirtyProperty(name, type, backingFieldName, false);
+                return new DirtyProperty(name, type, backingFieldName, false, preserveCollectionType);
             }
 
             public string Name { get; }
@@ -664,6 +681,10 @@ namespace AutoDirty
             public string BackingFieldName { get; }
 
             public bool GenerateBackingField { get; }
+
+            public bool PreserveCollectionType { get; }
+
+            public bool UseDirtyCollectionWrapper => !PreserveCollectionType;
 
             public bool IsList
             {
@@ -741,16 +762,31 @@ namespace AutoDirty
             {
                 if (IsList)
                 {
+                    if (!UseDirtyCollectionWrapper)
+                    {
+                        return Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    }
+
                     return "global::System.Collections.Generic.IList<" + ListElementTypeName + ">";
                 }
 
                 if (IsDictionary)
                 {
+                    if (!UseDirtyCollectionWrapper)
+                    {
+                        return Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    }
+
                     return "global::System.Collections.Generic.IDictionary<" + DictionaryKeyTypeName + ", " + DictionaryValueTypeName + ">";
                 }
 
                 if (IsHashSet)
                 {
+                    if (!UseDirtyCollectionWrapper)
+                    {
+                        return Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                    }
+
                     return "global::Amanda.AutoDirtySet<" + HashSetElementTypeName + ">";
                 }
 
@@ -766,10 +802,17 @@ namespace AutoDirty
                         return false;
                     }
 
+                    if (Type is IArrayTypeSymbol)
+                    {
+                        return false;
+                    }
+
                     var namedType = Type as INamedTypeSymbol;
                     return namedType == null || !namedType.IsSealed;
                 }
             }
+
+            public bool IsReferenceType => Type.IsReferenceType;
         }
     }
 }

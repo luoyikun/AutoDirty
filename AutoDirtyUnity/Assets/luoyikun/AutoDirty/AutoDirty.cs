@@ -32,6 +32,11 @@ namespace Amanda
         }
     }
 
+    [AttributeUsage(AttributeTargets.Field, Inherited = false)]
+    public sealed class AutoDirtyRawCollectionAttribute : Attribute
+    {
+    }
+
     public interface IAutoDirtyNode
     {
         void SetDirtyCallback(Action markDirty);

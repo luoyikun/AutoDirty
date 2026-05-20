@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Assets\luoyikun\AutoDirty\AutoDirtyTest.cs" />
     <Compile Include="Assets\luoyikun\AutoDirty\AutoDirty.cs" />
+    <Compile Include="Assets\luoyikun\TestRef\TestRef.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Roslyn\AutoDirty.dll" />

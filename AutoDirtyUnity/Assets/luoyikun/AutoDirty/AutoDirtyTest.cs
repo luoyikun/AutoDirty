@@ -24,11 +24,11 @@ namespace Amanda
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                m_playerData.CharData.Data = 2;
+                m_playerData.DicQianTao[1] = new Dictionary<int, int>();
             }
             else if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                m_playerData.ListInt.Add(3);
+                m_playerData.DicQianTao[1][2] = 3;
             }
             else if (Input.GetKeyDown(KeyCode.Alpha3))
             {
@@ -36,7 +36,7 @@ namespace Amanda
             }
             else if (Input.GetKeyDown(KeyCode.Alpha4))
             {
-                m_playerData.CharData.ClassC.Dic[1] = 2;
+                m_playerData.CharData.Data = 2;
             }
             else if (Input.GetKeyDown(KeyCode.Alpha5))
             {
@@ -58,9 +58,15 @@ namespace Amanda
                 Debug.Log($"Original Content: {content}");
                 Debug.Log($"New Content: {newContent}");
             }
+            else if (Input.GetKeyDown(KeyCode.Alpha9))
+            {
+                IList<ClassC> listClassC = m_playerData.CharData.ListClassC as IList<ClassC>;
+                listClassC.Add(new ClassC());
+            }
+           
 
-            Profiler.BeginSample("TestAutoDirty");
-            m_playerData.CharData.ClassC.Dic[1] = 2;
+                Profiler.BeginSample("TestAutoDirty");
+            //m_playerData.CharData.ClassC.Dic[1] = 2;
 
             Profiler.EndSample();
         }
@@ -81,7 +87,8 @@ namespace Amanda
         [JsonProperty]          // 只有打上此标签的成员才会被序列化
         bool m_bReta;
         [JsonProperty]          // 只有打上此标签的成员才会被序列化
-        ChatData m_charData = new();
+        ChatData m_charData;
+        Dictionary<int, Dictionary<int, int>> m_dicQianTao;
         void MarkDirty()
         {
             //SaveManager.Instance.MarkDirty(this);
@@ -100,10 +107,12 @@ namespace Amanda
         int m_data;
         [JsonProperty]          // 只有打上此标签的成员才会被序列化
         List<int> m_ListB = new();
+        //[AutoDirtyRawCollection]
         [JsonProperty]          // 只有打上此标签的成员才会被序列化
         List<ClassC> m_listClassC = new();
         [JsonProperty]          // 只有打上此标签的成员才会被序列化
         ClassC m_classC = new();
+
         void MarkDirty()
         {
             if (AutoDirtyTest.m_isLog)
@@ -129,5 +138,7 @@ namespace Amanda
             }
         }
     }
+
+
 
 }
